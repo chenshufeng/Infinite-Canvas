@@ -1,0 +1,75 @@
+{
+  "title": "Flux2-Klein",
+  "fields": [
+    {
+      "id": "f_foavybe",
+      "node": "270",
+      "input": "image",
+      "name": "图片",
+      "type": "image",
+      "default": "05-1.jpg",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    },
+    {
+      "id": "f_jgizefc",
+      "node": "278",
+      "input": "image",
+      "name": "图片",
+      "type": "image",
+      "default": "1 (4).jpg",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    },
+    {
+      "id": "f_ne3dw9m",
+      "node": "292",
+      "input": "image",
+      "name": "图片",
+      "type": "image",
+      "default": "05-1.jpg",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    },
+    {
+      "id": "f_6icwlbv",
+      "node": "168",
+      "input": "text",
+      "name": "提示词文本",
+      "type": "textarea",
+      "default": "改为夜晚",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    }
+  ],
+  "mini_cards": {
+    "prompt": {
+      "x": 24,
+      "y": 30
+    },
+    "image": {
+      "x": 24,
+      "y": 210
+    },
+    "custom": {
+      "x": 280,
+      "y": 78
+    },
+    "output": {
+      "x": 540,
+      "y": 120
+    }
+  }
+}
