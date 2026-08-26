@@ -1,0 +1,36 @@
+{
+  "title": "utility_birefnet_remove_background",
+  "fields": [
+    {
+      "id": "f_n7zqmdo",
+      "node": "17",
+      "input": "image",
+      "name": "图片",
+      "type": "image",
+      "default": "8c019177gy1hoq8jvul0aj20hs0nptae.jpg",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    }
+  ],
+  "mini_cards": {
+    "prompt": {
+      "x": 24,
+      "y": 30
+    },
+    "image": {
+      "x": 24,
+      "y": 210
+    },
+    "custom": {
+      "x": 280,
+      "y": 78
+    },
+    "output": {
+      "x": 540,
+      "y": 120
+    }
+  }
+}

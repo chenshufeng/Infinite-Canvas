@@ -1,0 +1,62 @@
+{
+  "title": "image_mage_flow_edit_turbo_int8",
+  "fields": [
+    {
+      "id": "f_uzn36sr",
+      "node": "7",
+      "input": "image",
+      "name": "图片",
+      "type": "image",
+      "default": "ref-0.jpg",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    },
+    {
+      "id": "f_jka1cq5",
+      "node": "12:5",
+      "input": "prompt",
+      "name": "提示词",
+      "type": "textarea",
+      "default": "Task: Generate a high‑quality “Chibi Clone Sticker Diary Photo” based on the uploaded photo of a real person.\n\n【Core Reference Principle】\nUse the real person in the uploaded photo as the sole visual benchmark. All chibi clones must strictly replicate the hairstyle (including fringe direction, hair colour, and accessories), outfit (style, colour, pattern, material), footwear, and accessories (hats, earrings, necklaces, etc.) from the photo – no alterations or inventions allowed. Facial features (face shape, eye shape, skin tone) may be stylised in chibi form but must remain recognisable as the same individual.\n\n【Main Composition】\nPlace the real model in the centre, in a high‑resolution, natural social‑media selfie or candid pose. The image should be crisp (4K recommended) with an overall refined, playful, well‑balanced layout that feels visually rich but not cluttered.\n\n【Chibi Clone Sticker Design】\nAdd 5–8 miniature chibi clones around the main subject, in a “big head, small body” (head‑to‑body ratio ≈ 1:1.5) style with large expressive eyes and a clean, digital flat‑art / slight gradient aesthetic.\n\nEach clone must:\n\nHave exactly the same hairstyle, outfit colour, outfit design, and accessories as the real person (extracted precisely from the uploaded photo).\n\nFeature a different pose and expression – e.g., hands on hips with a smile, one hand adjusting a hat, jumping and looking back, turned away in a side view, lying down with chin resting on hand, peace sign and winking, arms raised stretching, etc. All poses must be distinct from each other and fit the scene (street, indoor daily life, travel, etc.).\n\nMatch the expression to the pose (playful, proud, lazy, surprised, cute, etc.).\n\n【Sticker Rendering Effects】\nEach chibi clone must be rendered as an independent sticker with:\n\nA white outer outline stroke (about 2–3px wide, with slight feathering at the edges).\n\nSoft drop shadows (semi‑transparent, consistent direction, moderate distance).\n\nA slight floating effect (elevated slightly above the background to create depth).\n\nArrange the stickers around the main subject and at the corners/edges of the frame in a radial layout, ensuring they do not cover the real person’s face, torso, or key outfit details.\n\n【Hand‑Drawn Doodle Elements】\nAdd light, hand‑drawn style doodles, including: hearts, sparkles/stars, directional arrows, motion/speed lines, small circles/dots.\nColour palette: primarily white with soft pink (#FFB6C1 to #FFC0CB) accents. Keep strokes simple, semi‑transparent, and in a “scrapbook / diary” handmade feel – they should blend naturally with the overall image and not overpower the subject.\n\n【Hand‑Lettering Phrases】\nInclude 5–8 short, hand‑lettered English phrases that match the cute / energetic / uplifting vibe. Examples:\n“Be a cutie”, “Daily dose”, “Shine bright”, “Good vibes”, “Smile more”, “Chill day”, “Oh my gosh”, “So me”.\n\nText style:\n\nMain colour: white.\n\nAccents: soft pink highlights, underlines, or outlines.\n\nSmall decorative symbols (e.g., sparkles ✦, wavy lines 〰️, dots ···) may be added.\n\nPosition these phrases in empty areas of the frame, coordinated with the doodles, and ensure they never cover the main subject or any chibi clone.\n\n【Overall Composition & Aesthetic】\n\nThe real model stays centred; chibi stickers, doodles, and text spread radially around to create a “subject‑centred, elements‑floating” balanced rhythm.\n\nThe background may retain the original scene (with blur) or be replaced by a soft solid / gradient colour – but the chibi clones’ outfit colours must remain true to the original photo in either case.\n\nFinal output: high‑resolution, bright and cheerful, refined and playful social‑media diary style – visually dense but clear‑layered, without chaotic overlapping.\n\n【Generation Constraints】\n\nAbsolutely do not change the hairstyle, outfit, or main accessories of the real person in the photo.\n\nChibi clones’ faces can be cute‑stylised, but must retain recognisable traits of the original person (e.g., signature fringe, glasses, moles, etc.).\n\nAll stickers, doodles, and text should be rendered in separate layers for crisp edges and consistent texture.",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    },
+    {
+      "id": "f_thq88fm",
+      "node": "12:5",
+      "input": "negative_prompt",
+      "name": "negative_prompt",
+      "type": "textarea",
+      "default": "",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    }
+  ],
+  "mini_cards": {
+    "prompt": {
+      "x": 24,
+      "y": 30
+    },
+    "image": {
+      "x": 24,
+      "y": 210
+    },
+    "custom": {
+      "x": 280,
+      "y": 78
+    },
+    "output": {
+      "x": 540,
+      "y": 120
+    }
+  }
+}

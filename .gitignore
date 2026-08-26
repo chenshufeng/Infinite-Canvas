@@ -1,0 +1,42 @@
+# Python 运行时
+python/
+__pycache__/
+*.pyc
+*.pyo
+
+# 依赖包（离线 wheel）
+packages/
+
+# 输出文件
+output/
+assets/output/
+assets/uploads/
+
+# 数据文件（运行时生成）
+data/canvases/
+data/conversations/
+data/api_providers.json
+data/projects.json
+data/prompt_libraries.json
+data/asset_library.json
+history.json
+
+# 环境配置
+API/.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+.DS_Store
+
+# 备份文件
+*.bak
+*.broken-before-*
+*.mojibake-backup
+*.stable-before-*
+i18n(1)/

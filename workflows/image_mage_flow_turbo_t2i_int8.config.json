@@ -1,0 +1,49 @@
+{
+  "title": "image_mage_flow_turbo_t2i_int8",
+  "fields": [
+    {
+      "id": "f_ewlzbc4",
+      "node": "12:5",
+      "input": "prompt",
+      "name": "提示词",
+      "type": "textarea",
+      "default": "a photo-realistic shoot from a front camera angle about a woman in a wedding dress standing in a mystical setting, surrounded by rocks and greenery, the image also shows a woman standing in the middle of the image, wearing a white lace wedding dress with a high neckline and a long veil that flows behind her, the woman, who appears to be in her early twenties, has long black hair styled in an elegant updo, and is looking directly at the camera with a serene expression, she is standing with one hand on her hip and the other hand resting on her thigh, her slim body is accentuated by the intricate lace details of the dress, and she is wearing a pair of earrings, the background is a rocky, ancient structure with soft, diffused light filtering through the foliage, creating a mystical atmosphere, the overall mood is one of serenity and elegance, with the woman standing confidently in the center of the frame",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    },
+    {
+      "id": "f_euc7fnm",
+      "node": "12:5",
+      "input": "negative_prompt",
+      "name": "negative_prompt",
+      "type": "textarea",
+      "default": "",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    }
+  ],
+  "mini_cards": {
+    "prompt": {
+      "x": 24,
+      "y": 30
+    },
+    "image": {
+      "x": 24,
+      "y": 210
+    },
+    "custom": {
+      "x": 280,
+      "y": 78
+    },
+    "output": {
+      "x": 540,
+      "y": 120
+    }
+  }
+}

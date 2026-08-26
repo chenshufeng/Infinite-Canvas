@@ -1,0 +1,132 @@
+{
+  "10": {
+    "inputs": {
+      "filename_prefix": "Mage_flow_turbo",
+      "format": "png",
+      "format.bit_depth": "8-bit",
+      "format.input_color_space": "sRGB",
+      "images": [
+        "12:8",
+        0
+      ]
+    },
+    "class_type": "SaveImageAdvanced",
+    "_meta": {
+      "title": "保存图像（高级）"
+    }
+  },
+  "27": {
+    "inputs": {
+      "aspect_ratio": "1:1 (Square)",
+      "megapixels": 1,
+      "multiple": 16
+    },
+    "class_type": "ResolutionSelector",
+    "_meta": {
+      "title": "分辨率选择器"
+    }
+  },
+  "12:1": {
+    "inputs": {
+      "unet_name": "mage_flow_turbo_int8_convrot.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "UNet加载器"
+    }
+  },
+  "12:3": {
+    "inputs": {
+      "clip_name": "qwen3vl_4b_bf16.safetensors",
+      "type": "mage",
+      "device": "default"
+    },
+    "class_type": "CLIPLoader",
+    "_meta": {
+      "title": "加载CLIP"
+    }
+  },
+  "12:4": {
+    "inputs": {
+      "vae_name": "mage_flow_vae_bf16.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "加载VAE"
+    }
+  },
+  "12:5": {
+    "inputs": {
+      "prompt": "a photo-realistic shoot from a front camera angle about a woman in a wedding dress standing in a mystical setting, surrounded by rocks and greenery, the image also shows a woman standing in the middle of the image, wearing a white lace wedding dress with a high neckline and a long veil that flows behind her, the woman, who appears to be in her early twenties, has long black hair styled in an elegant updo, and is looking directly at the camera with a serene expression, she is standing with one hand on her hip and the other hand resting on her thigh, her slim body is accentuated by the intricate lace details of the dress, and she is wearing a pair of earrings, the background is a rocky, ancient structure with soft, diffused light filtering through the foliage, creating a mystical atmosphere, the overall mood is one of serenity and elegance, with the woman standing confidently in the center of the frame",
+      "negative_prompt": "",
+      "width": [
+        "27",
+        0
+      ],
+      "height": [
+        "27",
+        1
+      ],
+      "batch_size": 1,
+      "clip": [
+        "12:3",
+        0
+      ],
+      "vae": [
+        "12:4",
+        0
+      ]
+    },
+    "class_type": "TextEncodeMageFlowEdit",
+    "_meta": {
+      "title": "TextEncodeMageFlowEdit"
+    }
+  },
+  "12:6": {
+    "inputs": {
+      "seed": 816267842249023,
+      "steps": 4,
+      "cfg": 1,
+      "sampler_name": "euler",
+      "scheduler": "simple",
+      "denoise": 1,
+      "model": [
+        "12:1",
+        0
+      ],
+      "positive": [
+        "12:5",
+        0
+      ],
+      "negative": [
+        "12:5",
+        1
+      ],
+      "latent_image": [
+        "12:5",
+        2
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "K采样器"
+    }
+  },
+  "12:8": {
+    "inputs": {
+      "samples": [
+        "12:6",
+        0
+      ],
+      "vae": [
+        "12:4",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE解码"
+    }
+  }
+}

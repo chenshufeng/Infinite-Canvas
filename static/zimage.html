@@ -17,12 +17,12 @@
             } catch(e) {}
         })();
     </script>
-    <script src="/static/vendor/js/tailwindcss-cdn.js?v=2026.08.01.1785292594"></script>
-    <script src="/static/vendor/js/lucide.js?v=2026.08.01.1785292594"></script>
-    <script src="/static/js/theme.js?v=2026.08.01.1785292593"></script>
-    <script src="/static/js/i18n.js?v=2026.08.01.1785292592"></script>
-    <script src="/static/js/image-preview.js?v=2026.08.01.1785292584"></script>
-    <script src="/static/js/history-bulk-manager.js?v=2026.08.01.1785292584"></script>
+    <script src="/static/vendor/js/tailwindcss-cdn.js?v=2026.08.04.1787198026"></script>
+    <script src="/static/vendor/js/lucide.js?v=2026.08.04.1787198026"></script>
+    <script src="/static/js/theme.js?v=2026.08.04.1787198026"></script>
+    <script src="/static/js/i18n.js?v=2026.08.04.1787198026"></script>
+    <script src="/static/js/image-preview.js?v=2026.08.04.1787198026"></script>
+    <script src="/static/js/history-bulk-manager.js?v=2026.08.04.1787198026"></script>
     <style>
         :root {
             --bg-base: #f8f8f8;
@@ -175,7 +175,7 @@
             display: none;
         }
     </style>
-    <link rel="stylesheet" href="/static/css/theme.css?v=2026.08.01.1785292588">
+    <link rel="stylesheet" href="/static/css/theme.css?v=2026.08.04.1787198026">
 </head>
 
 <body class="antialiased">
@@ -215,6 +215,16 @@
                                 </div>
                                 <div id="glider" class="mode-glider"></div>
                             </div>
+                        </div>
+
+                        <div class="h-8 w-px bg-gray-100"></div>
+
+                        <div class="flex flex-col">
+                            <span class="text-[9px] font-bold text-gray-400 uppercase mb-1">Workflow</span>
+                            <select id="workflowSelect" onchange="onWorkflowChange()"
+                                class="bg-transparent text-xs font-bold outline-none border-b border-transparent focus:border-black cursor-pointer max-w-[160px]">
+                                <option value="Z-Image.json">Z-Image (默认)</option>
+                            </select>
                         </div>
 
                         <div class="h-8 w-px bg-gray-100"></div>
@@ -336,6 +346,47 @@
         let currentEngine = 'local';
         const MS_TOKEN_KEY = 'modelscope_api_token';
         const ENGINE_MODE_KEY = 'zimage_engine_mode';
+        const WORKFLOW_KEY = 'zimage_workflow';
+        let currentWorkflowConfig = null;
+
+        // 加载工作流列表
+        async function loadWorkflowList() {
+            const select = document.getElementById('workflowSelect');
+            try {
+                const res = await fetch('/api/workflows');
+                const data = await res.json();
+                if (data.workflows && data.workflows.length > 0) {
+                    data.workflows.forEach(wf => {
+                        const opt = document.createElement('option');
+                        opt.value = wf.name;
+                        opt.textContent = wf.title || wf.name;
+                        select.appendChild(opt);
+                    });
+                }
+                // 恢复上次选择
+                const saved = localStorage.getItem(WORKFLOW_KEY);
+                if (saved) {
+                    for (let opt of select.options) {
+                        if (opt.value === saved) { select.value = saved; break; }
+                    }
+                }
+                onWorkflowChange();
+            } catch (e) { console.error('Load workflows failed:', e); }
+        }
+
+        // 工作流切换时加载配置
+        async function onWorkflowChange() {
+            const select = document.getElementById('workflowSelect');
+            const wfName = select.value;
+            localStorage.setItem(WORKFLOW_KEY, wfName);
+            currentWorkflowConfig = null;
+            if (wfName === 'Z-Image.json') return;
+            try {
+                const res = await fetch('/api/workflows/' + wfName);
+                const data = await res.json();
+                if (data.config) currentWorkflowConfig = data.config;
+            } catch (e) { console.error('Load workflow config failed:', e); }
+        }
 
         // 1. Token handled via index.html sidebar
 
@@ -434,24 +485,52 @@
             const placeholder = createPlaceholder("Local Rendering");
             document.getElementById('masonry').prepend(placeholder);
 
+            const wfName = document.getElementById('workflowSelect').value;
+            const body = {
+                prompt,
+                width: parseInt(document.getElementById('width').value),
+                height: parseInt(document.getElementById('height').value),
+                type: "zimage",
+                client_id: CLIENT_ID,
+                workflow_json: wfName
+            };
+            // 如果有自定义工作流配置，构建 params
+            if (currentWorkflowConfig && currentWorkflowConfig.fields) {
+                const params = {};
+                currentWorkflowConfig.fields.forEach(field => {
+                    let value = null;
+                    if (field.input === 'text') {
+                        value = prompt;
+                    } else {
+                        const el = document.getElementById('wf_field_' + field.id);
+                        if (el) value = el.type === 'number' ? Number(el.value) : el.value;
+                    }
+                    if (value !== null && value !== '') {
+                        if (!params[field.node]) params[field.node] = {};
+                        params[field.node][field.input] = value;
+                    }
+                });
+                if (Object.keys(params).length > 0) body.params = params;
+            }
+
             try {
                 const res = await fetch('/api/generate', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        prompt,
-                        width: parseInt(document.getElementById('width').value),
-                        height: parseInt(document.getElementById('height').value),
-                        type: "zimage",
-                        client_id: CLIENT_ID
-                    })
+                    body: JSON.stringify(body)
                 });
                 const data = await res.json();
                 placeholder.remove();
-                if (data.images?.length > 0) renderImageCard(data, true);
+                if (data.images?.length > 0) {
+                    renderImageCard(data, true);
+                } else if (data.error) {
+                    alert(data.error);
+                } else if (!res.ok) {
+                    alert(data.detail || 'Local render failed (HTTP ' + res.status + ')');
+                }
             } catch (e) {
                 placeholder.remove();
-                alert("Local render failed");
+                alert("Local render failed: " + (e.message || e));
             } finally {
                 setLoading(false);
             }
@@ -554,6 +633,7 @@
         }, { threshold: 0.1 });
 
         window.onload = () => {
+            loadWorkflowList();
             loadHistory(0).then(() => {
                 window.HistoryBulkManager?.attach({masonry:'#masonry'});
                 const trigger = document.getElementById('loadMoreTrigger');

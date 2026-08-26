@@ -1,0 +1,75 @@
+{
+  "title": "image_flux2_klein_image_edit_9b_base",
+  "fields": [
+    {
+      "id": "f_pkyyoln",
+      "node": "75:74",
+      "input": "text",
+      "name": "提示词文本",
+      "type": "textarea",
+      "default": "Change the camera angle to a first-person driver's perspective looking through the steering wheel at the dashboard and windshield, maintaining the same white minimalist interior style and lighting\n",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    },
+    {
+      "id": "f_e8qzpuq",
+      "node": "75:67",
+      "input": "text",
+      "name": "提示词文本",
+      "type": "textarea",
+      "default": "",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    },
+    {
+      "id": "f_wugbk0u",
+      "node": "76",
+      "input": "image",
+      "name": "图片",
+      "type": "image",
+      "default": "89d3eb58-39e2-43bd-a7d8-9b0fb5c3249e.png",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    },
+    {
+      "id": "f_fil1ndc",
+      "node": "81",
+      "input": "image",
+      "name": "图片",
+      "type": "image",
+      "default": "00029-4051538264.png",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    }
+  ],
+  "mini_cards": {
+    "prompt": {
+      "x": 24,
+      "y": 30
+    },
+    "image": {
+      "x": 24,
+      "y": 210
+    },
+    "custom": {
+      "x": 280,
+      "y": 78
+    },
+    "output": {
+      "x": 540,
+      "y": 120
+    }
+  }
+}

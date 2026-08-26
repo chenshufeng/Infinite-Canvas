@@ -1,7 +1,7 @@
 {
   "15": {
     "inputs": {
-      "image": "pasted/image (794).png"
+      "image": "89d3eb58-39e2-43bd-a7d8-9b0fb5c3249e.png"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -11,12 +11,6 @@
   "23": {
     "inputs": {
       "text": "丰富的细节",
-      "speak_and_recognation": {
-        "__value__": [
-          false,
-          true
-        ]
-      },
       "clip": [
         "34",
         0
@@ -50,7 +44,7 @@
   },
   "33": {
     "inputs": {
-      "model_name": "z_image_turbo_bf16.safetensors",
+      "model_name": "z_image_turbo_int8_convrot.safetensors",
       "weight_dtype": "default",
       "key_opt": "",
       "mode": "Auto"
@@ -93,15 +87,12 @@
   },
   "146": {
     "inputs": {
-      "seed": 279629946795727,
+      "seed": 644324493524333,
       "steps": 10,
       "cfg": 0.7,
       "sampler_name": "euler",
       "scheduler": "sgm_uniform",
-      "denoise": [
-        "202",
-        0
-      ],
+      "denoise": 0.5,
       "model": [
         "166",
         0
@@ -219,15 +210,12 @@
   },
   "181": {
     "inputs": {
-      "seed": 820960346993579,
+      "seed": 846384788215064,
       "steps": 10,
       "cfg": 1,
       "sampler_name": "euler_cfg_pp",
       "scheduler": "simple",
-      "denoise": [
-        "202",
-        0
-      ],
+      "denoise": 0.5,
       "model": [
         "33",
         0
@@ -250,27 +238,10 @@
       "title": "K采样器"
     }
   },
-  "184": {
-    "inputs": {
-      "seed": 882274830236035,
-      "strength": [
-        "202",
-        0
-      ],
-      "image": [
-        "15",
-        0
-      ]
-    },
-    "class_type": "ImageAddNoise",
-    "_meta": {
-      "title": "图像添加噪声"
-    }
-  },
   "186": {
     "inputs": {
       "pixels": [
-        "189",
+        "191",
         0
       ],
       "vae": [
@@ -281,27 +252,6 @@
     "class_type": "VAEEncode",
     "_meta": {
       "title": "VAE编码"
-    }
-  },
-  "189": {
-    "inputs": {
-      "blend_factor": [
-        "202",
-        0
-      ],
-      "blend_mode": "multiply",
-      "image1": [
-        "191",
-        0
-      ],
-      "image2": [
-        "184",
-        0
-      ]
-    },
-    "class_type": "ImageBlend",
-    "_meta": {
-      "title": "图像混合"
     }
   },
   "191": {
@@ -317,67 +267,6 @@
     "class_type": "ImageSharpen",
     "_meta": {
       "title": "图像锐化"
-    }
-  },
-  "193": {
-    "inputs": {
-      "image": [
-        "15",
-        0
-      ]
-    },
-    "class_type": "GetImageSize+",
-    "_meta": {
-      "title": "获取图像尺寸"
-    }
-  },
-  "201": {
-    "inputs": {
-      "expression": "(a+b)*c/10000",
-      "speak_and_recognation": {
-        "__value__": [
-          false,
-          true
-        ]
-      },
-      "a": [
-        "193",
-        0
-      ],
-      "b": [
-        "193",
-        1
-      ],
-      "c": [
-        "204",
-        0
-      ]
-    },
-    "class_type": "MathExpression|pysssss",
-    "_meta": {
-      "title": "数学表达式"
-    }
-  },
-  "202": {
-    "inputs": {
-      "output_type": "float",
-      "*": [
-        "201",
-        1
-      ]
-    },
-    "class_type": "easy convertAnything",
-    "_meta": {
-      "title": "转换任何"
-    }
-  },
-  "204": {
-    "inputs": {
-      "value": 0.5
-    },
-    "class_type": "FloatConstant",
-    "_meta": {
-      "title": "浮点常量"
     }
   }
 }

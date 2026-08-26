@@ -1,0 +1,49 @@
+{
+  "title": "2511",
+  "fields": [
+    {
+      "id": "f_ijsr6cz",
+      "node": "3",
+      "input": "prompt",
+      "name": "提示词",
+      "type": "textarea",
+      "default": "",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    },
+    {
+      "id": "f_fsd7rm2",
+      "node": "31",
+      "input": "image",
+      "name": "图片",
+      "type": "image",
+      "default": "89d3eb58-39e2-43bd-a7d8-9b0fb5c3249e.png",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    }
+  ],
+  "mini_cards": {
+    "prompt": {
+      "x": 24,
+      "y": 30
+    },
+    "image": {
+      "x": 24,
+      "y": 210
+    },
+    "custom": {
+      "x": 280,
+      "y": 78
+    },
+    "output": {
+      "x": 540,
+      "y": 120
+    }
+  }
+}

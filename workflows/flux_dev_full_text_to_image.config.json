@@ -1,0 +1,36 @@
+{
+  "title": "flux_dev_full_text_to_image",
+  "fields": [
+    {
+      "id": "f_ah25pcv",
+      "node": "194:49",
+      "input": "text",
+      "name": "提示词文本",
+      "type": "textarea",
+      "default": "A fairy tale scene of a young girl with silver curly hair wearing a delicate white dress, standing among crystal butterflies and glowing glass roses. The scene is filled with soft magical light, like a dream from a fantasy world.",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    }
+  ],
+  "mini_cards": {
+    "prompt": {
+      "x": 24,
+      "y": 30
+    },
+    "image": {
+      "x": 24,
+      "y": 210
+    },
+    "custom": {
+      "x": 280,
+      "y": 78
+    },
+    "output": {
+      "x": 540,
+      "y": 120
+    }
+  }
+}

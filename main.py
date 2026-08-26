@@ -18901,8 +18901,6 @@ def list_workflows():
             if not fn.endswith(".json") or fn.endswith(".config.json"):
                 continue
             rel = os.path.relpath(os.path.join(root, fn), WORKFLOW_DIR).replace("\\", "/")
-            if is_builtin_workflow(rel):
-                continue
             cfg = {}
             cfg_path = workflow_config_path(rel)
             if os.path.exists(cfg_path):

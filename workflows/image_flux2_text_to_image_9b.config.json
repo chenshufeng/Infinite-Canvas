@@ -1,0 +1,49 @@
+{
+  "title": "image_flux2_text_to_image_9b",
+  "fields": [
+    {
+      "id": "f_zomckvo",
+      "node": "75:67",
+      "input": "text",
+      "name": "提示词文本",
+      "type": "textarea",
+      "default": "",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    },
+    {
+      "id": "f_t763xc2",
+      "node": "75:74",
+      "input": "text",
+      "name": "提示词文本",
+      "type": "textarea",
+      "default": "A vintage motorcycle parked in front of a retro diner at sunset, warm orange and pink sky, neon signs glowing, 80s vintage photo style, film grain, warm color cast",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    }
+  ],
+  "mini_cards": {
+    "prompt": {
+      "x": 24,
+      "y": 30
+    },
+    "image": {
+      "x": 24,
+      "y": 210
+    },
+    "custom": {
+      "x": 280,
+      "y": 78
+    },
+    "output": {
+      "x": 540,
+      "y": 120
+    }
+  }
+}

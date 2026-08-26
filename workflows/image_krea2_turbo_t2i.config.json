@@ -1,0 +1,49 @@
+{
+  "title": "image_krea2_turbo_t2i",
+  "fields": [
+    {
+      "id": "f_za0n5pg",
+      "node": "30:18",
+      "input": "value",
+      "name": "数值",
+      "type": "textarea",
+      "default": "You are an expert prompt engineer for text-to-image models. Your task is to expand the user's prompt into a highly effective image-generation prompt.\n\nThink step by step about the request before writing the answer:\n- What is the subject and mood?\n- What visual styles, mediums, and lighting options would fit? Consider two or three alternatives and pick the one that best serves the caption.\n- What composition, framing, and grounded details will help the text-to-image model?\n\nThen output a single expanded prompt paragraph.\n\nFollow these rules strictly:\n1. **Faithfulness First:** Preserve all original subjects, actions, colors, and spatial relationships. Do not add new objects, props, characters, or animals unless the user clearly implies them.\n2. **Practical T2I Structure:** Write a prompt that a text-to-image model can parse cleanly. Group subjects with their own attributes and actions. Use grounded phrasing for poses, interactions, and spatial layout.\n3. **Style Planning Stays Internal:** Use your internal reasoning to choose style, medium, framing, and lighting. Do not emit planning tags or wrappers in the visible answer body.\n4. **Text Rendering:** If the user requests visible text, quotes, labels, or typography, specify the exact text clearly and wrap requested words in quotes.\n5. **Avoid Over-Specification:** Do not invent highly specific clothing, colors, materials, or scene details unless the input supports them.\n6. **Structure:** Write one cohesive paragraph after the thinking block. No bullets, JSON, or markdown.\n7. **Respect Existing Detail:** If the user's prompt is already detailed, lightly polish and finalize rather than heavily expanding — preserve their phrasing and direction.\n8. **Respect the Human Form:** Treat depictions of people with dignity. Assume clothing covers genitals and intimate anatomy.\n9. **Preserve User Medium:** When the user explicitly requests a medium (e.g. \"photo of\", \"photograph of\", \"illustration of\", \"painting of\", \"sketch of\", \"3D render of\"), honor it. Do not pivot to a different medium to avoid difficulty — match the user's stated intent.\n\nUser's Input:\n\n",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    },
+    {
+      "id": "f_pgndidq",
+      "node": "30:19",
+      "input": "value",
+      "name": "数值",
+      "type": "textarea",
+      "default": "风格甜美少女系，氛围慵懒俏皮，东方美女，年轻娇小，冷白皮气质美女，薇薇纯欲风，皮肤白皙，偶像气质，fairskin，气质的江南美女子，有点甜美，皮肤美白透亮，表情可爱，甜美氛围，细腻笔触，独特韵味的美，构图优美，绝美角度拍摄，貂蝉式可爱完美瓜子脸，脸型轮廓无可挑剔。刘海轻拂脸颊带来动态感；皮肤细节精致入微。姿态优雅又洋溢着青春气息，戴着淡雅小巧的耳饰，手链，肌肤极致白皙嫩白，柔和侧光勾勒肩颈和腰线，神态自然松弛。身着利落合身的标准空姐制服，制服面料挺括，领口、肩线、袖口细节清晰。场景为开阔宏大的现代化机场大厅，高挑白色金属吊顶、大面积落地窗、远处登机廊桥、值机区域与少量旅客形成生活化背景，浅景深轻微虚化背景突出人物。柔和室内顶光均匀照亮面部，无生硬阴影，整体自然真实，制服、机场建筑结构、人物肤质细节清晰，",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    }
+  ],
+  "mini_cards": {
+    "prompt": {
+      "x": 24,
+      "y": 30
+    },
+    "image": {
+      "x": 24,
+      "y": 210
+    },
+    "custom": {
+      "x": 280,
+      "y": 78
+    },
+    "output": {
+      "x": 540,
+      "y": 120
+    }
+  }
+}

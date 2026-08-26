@@ -11947,8 +11947,9 @@ async function runComfyUpscale(imageUrl, resolution, options={}){
     const upscale = await runQueuedComfyGenerate({
         workflow_json:'upscale.json',
         params:{
-            "15": { image:nextInput },
-            "172": { seed:Math.floor(Math.random() * 4294967295), resolution:Number(resolution || 2048) }
+            "77": { image:nextInput },
+            "87:69": { seed:Math.floor(Math.random() * 4294967295) },
+            "87:78": { megapixels:Number(resolution || 2048) / 1024 }
         },
         type:'enhance',
         client_id:CLIENT_ID
@@ -12624,8 +12625,7 @@ async function runComfyNode(nodeId, opts={}){
             const enhance = await runQueuedComfyGenerate({
                 workflow_json:'Z-Image-Enhance.json',
                 params:{
-                    "15": { image:inputName },
-                    "204": { value:Number(node.enhanceStrength ?? 0.5) }
+                    "15": { image:inputName }
                 },
                 type:'enhance',
                 client_id:CLIENT_ID

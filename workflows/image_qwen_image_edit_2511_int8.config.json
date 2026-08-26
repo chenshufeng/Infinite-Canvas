@@ -1,0 +1,62 @@
+{
+  "title": "image_qwen_image_edit_2511_int8",
+  "fields": [
+    {
+      "id": "f_aw5rmz0",
+      "node": "41",
+      "input": "image",
+      "name": "图片",
+      "type": "image",
+      "default": "Krea2_turbo_00014_.png",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    },
+    {
+      "id": "f_v4ggyj2",
+      "node": "196",
+      "input": "image",
+      "name": "图片",
+      "type": "image",
+      "default": "image (1).png",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    },
+    {
+      "id": "f_s4uc5ig",
+      "node": "170:149",
+      "input": "prompt",
+      "name": "提示词",
+      "type": "textarea",
+      "default": "",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    }
+  ],
+  "mini_cards": {
+    "prompt": {
+      "x": 24,
+      "y": 30
+    },
+    "image": {
+      "x": 24,
+      "y": 210
+    },
+    "custom": {
+      "x": 280,
+      "y": 78
+    },
+    "output": {
+      "x": 540,
+      "y": 120
+    }
+  }
+}
