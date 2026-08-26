@@ -1,6 +1,20 @@
 {
   "title": "Z-Image",
-  "fields": [],
+  "fields": [
+    {
+      "id": "f_49nm9pl",
+      "node": "23",
+      "input": "text",
+      "name": "提示词文本",
+      "type": "textarea",
+      "default": "",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    }
+  ],
   "mini_cards": {
     "prompt": {
       "x": 24,
