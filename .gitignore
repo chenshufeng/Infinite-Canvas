@@ -9,8 +9,9 @@ packages/
 
 # 输出文件
 output/
-assets/output/
-assets/uploads/
+
+# 资源文件（用户上传/生成）
+assets/
 
 # 数据文件（运行时生成）
 data/canvases/

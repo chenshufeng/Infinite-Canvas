@@ -131,13 +131,20 @@
                 </div>
                 <button id="promptTemplateClose" type="button" title="关闭"><i data-lucide="x"></i></button>
             </div>
-            <select id="promptTemplateLibrarySelect" class="prompt-template-library-select" title="选择提示词库"></select>
-            <div class="prompt-template-search">
-                <i data-lucide="search"></i>
-                <input id="promptTemplateSearch" type="search" placeholder="搜索模板...">
+            <div id="promptTemplateTabs" class="prompt-template-tabs-bar">
+                <button type="button" class="prompt-template-tab active" data-tab="local"><i data-lucide="folder-open"></i><span>本地词库</span></button>
+                <button type="button" class="prompt-template-tab" data-tab="community"><i data-lucide="globe"></i><span>社区词库</span></button>
             </div>
-            <div id="promptTemplateCats" class="prompt-template-cats"></div>
-            <div id="promptTemplateBody" class="prompt-template-body"></div>
+            <div id="promptTemplateLocalWrap">
+                <select id="promptTemplateLibrarySelect" class="prompt-template-library-select" title="选择提示词库"></select>
+                <div class="prompt-template-search">
+                    <i data-lucide="search"></i>
+                    <input id="promptTemplateSearch" type="search" placeholder="搜索模板...">
+                </div>
+                <div id="promptTemplateCats" class="prompt-template-cats"></div>
+                <div id="promptTemplateBody" class="prompt-template-body"></div>
+            </div>
+            <div id="promptTemplateCommunityBody" class="prompt-template-community-body" style="display:none"></div>
         </div>
         <button id="smartArrangeBtn" class="minimap-arrange-btn" type="button" title="整理选中节点" aria-label="整理选中节点"><i data-lucide="layout-grid"></i><span>整理选中</span></button>
         <div id="minimap" class="smart-minimap" aria-hidden="true">
@@ -444,6 +451,7 @@
         <div id="toast" class="toast"></div>
         <div id="mentionPreview" class="mention-preview"><img alt="preview"></div>
     </div>
+    <script src="/static/js/community-prompts.js?v=2026.08.04.1787198026"></script>
     <script src="/static/js/smart-canvas.js?v=2026.08.04.1787198026"></script>
 </body>
 </html>

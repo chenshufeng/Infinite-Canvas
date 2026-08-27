@@ -1,0 +1,84 @@
+{
+  "title": "video_ltx2_5_t2v",
+  "fields": [
+    {
+      "id": "f_2zeev20",
+      "node": "405:373",
+      "input": "text",
+      "name": "提示词文本",
+      "type": "textarea",
+      "default": "pc game, console game, video game, cartoon, childish, ugly",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    },
+    {
+      "id": "f_p8y27t9",
+      "node": "409",
+      "input": "aspect_ratio",
+      "name": "aspect_ratio",
+      "type": "text",
+      "default": "16:9 (Widescreen)",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "random_enabled": false
+    },
+    {
+      "id": "f_5028o6m",
+      "node": "409",
+      "input": "megapixels",
+      "name": "百万像素",
+      "type": "number",
+      "default": 0.9,
+      "min": 0.0,
+      "max": 10.0,
+      "step": 0.1,
+      "options": [],
+      "random_enabled": false
+    },
+    {
+      "id": "f_9oh1p3t",
+      "node": "405:383",
+      "input": "value",
+      "name": "提示词增强",
+      "type": "boolean",
+      "default": true,
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    }
+  ],
+  "mini_cards": {
+    "prompt": {
+      "x": 24,
+      "y": 30
+    },
+    "image": {
+      "x": 24,
+      "y": 210
+    },
+    "custom": {
+      "x": 280,
+      "y": 78
+    },
+    "output": {
+      "x": 540,
+      "y": 120
+    }
+  }
+}

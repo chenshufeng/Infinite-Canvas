@@ -131,6 +131,7 @@ let promptTemplateCategory = 'all';
 let promptTemplateSelectedId = '';
 let promptTemplateEditing = false;
 let promptTemplateGroupEditMode = false;
+let activePromptTemplateTab = 'local'; // 'local' | 'community'
 let promptPresetDeleteArmed = false;
 let createMenuPoint = {x:0, y:0};
 let createMenuGroupId = '';
@@ -4652,8 +4653,30 @@ function restorePromptTemplateScroll(snapshot){
         if(detail) detail.scrollTop = snapshot.detailTop || 0;
     });
 }
+function syncPromptTemplateTabUI(){
+    const tabsBar = document.getElementById('promptTemplateTabs');
+    const localWrap = document.getElementById('promptTemplateLocalWrap');
+    const communityBody = document.getElementById('promptTemplateCommunityBody');
+    if(!tabsBar) return;
+    tabsBar.querySelectorAll('.prompt-template-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === activePromptTemplateTab);
+    });
+    if(localWrap) localWrap.style.display = activePromptTemplateTab === 'local' ? '' : 'none';
+    if(communityBody) communityBody.style.display = activePromptTemplateTab === 'community' ? '' : 'none';
+}
+function switchPromptTemplateTab(tab){
+    if(tab !== 'local' && tab !== 'community') return;
+    activePromptTemplateTab = tab;
+    syncPromptTemplateTabUI();
+    if(tab === 'community' && typeof renderCommunityTab === 'function') renderCommunityTab();
+}
 function renderPromptTemplatePanel(options={}){
     if(!promptTemplatePanel || !promptTemplateBody || !promptTemplateCats) return;
+    syncPromptTemplateTabUI();
+    if(activePromptTemplateTab === 'community'){
+        if(typeof renderCommunityTab === 'function') renderCommunityTab();
+        return;
+    }
     renderPromptLibrarySelect();
     const scrollSnapshot = options.preserveScroll === false ? null : promptTemplateScrollSnapshot();
     const query = String(promptTemplateSearch?.value || '').trim().toLowerCase();
@@ -18361,6 +18384,11 @@ promptTemplatePanel?.addEventListener('click', e => {
 });
 if(promptPresetClose) promptPresetClose.onclick = closePromptPresetPanel;
 if(promptTemplateClose) promptTemplateClose.onclick = closePromptTemplatePanel;
+const promptTemplateTabsBar = document.getElementById('promptTemplateTabs');
+if(promptTemplateTabsBar) promptTemplateTabsBar.addEventListener('click', (e) => {
+    const tabBtn = e.target.closest('.prompt-template-tab');
+    if(tabBtn && tabBtn.dataset.tab) switchPromptTemplateTab(tabBtn.dataset.tab);
+});
 if(promptTemplateSearch) promptTemplateSearch.oninput = () => renderPromptTemplatePanel({preserveScroll:false});
 if(promptTemplateLibrarySelect) promptTemplateLibrarySelect.onchange = async () => {
     activePromptLibraryId = promptTemplateLibrarySelect.value || 'system';

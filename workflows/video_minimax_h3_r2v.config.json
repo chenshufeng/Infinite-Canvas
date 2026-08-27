@@ -1,0 +1,75 @@
+{
+  "title": "video_minimax_h3_r2v",
+  "fields": [
+    {
+      "id": "f_qwmrcdi",
+      "node": "115",
+      "input": "megapixels",
+      "name": "百万像素",
+      "type": "number",
+      "default": 0.5,
+      "min": 0.0,
+      "max": 10.0,
+      "step": 0.1,
+      "options": [],
+      "random_enabled": false
+    },
+    {
+      "id": "f_p2c66du",
+      "node": "138",
+      "input": "value",
+      "name": "数值",
+      "type": "textarea",
+      "default": "subject_definitions:\n<Subject 1> is the young woman in <Picture 1>, with long wavy light-brown hair, fair skin, soft makeup, and a light-grey ribbed V-neck long-sleeved top with a small front seam detail. She is wearing blue denim jeans.\n<Picture 1> is the reference image serving as the first frame of the target video, showing <Subject 1> in a bright modern indoor space near a large window, with her left hand gently touching her hair near her face.\n\nsummary:\n[reference generation + keyframe completion] The target video begins from <Picture 1> and features <Subject 1> performing a natural, lighthearted 8-second dance in the same bright indoor window setting. She shifts from her initial static pose into a rhythmic swaying motion with arm waves and gentle hip swings, ending with a cheerful pose and a bright smile. The sequence maintains a casual, lifestyle-vlog aesthetic.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1], [Shot 2], [Shot 3]): fully_preserved - The subject's facial features, hair color and texture, outfit, and overall appearance are retained exactly as referenced.\n<Picture 1> ([Shot 1] first frame): fully_preserved - The video starts precisely on the referenced frame, capturing the initial composition and pose of <Subject 1> before the movement begins.\n\ndetailed_description:\nThe target video uses a bright, natural, and airy lifestyle-vlog visual style with soft daylight filtering through a large window.\n[Shot 1] The scene opens on a medium close-up that begins from <Picture 1>, showing <Subject 1>, the young woman with long wavy light-brown hair, standing in a modern room with a large window overlooking a cloudy daytime residential cityscape. She has her left hand raised near her face, her fingertips gently resting on her hair. As the 8-second clip starts, she slowly lowers her left hand down along her side. Her eyes remain engaged with the camera, and a subtle, relaxed smile forms on her lips. The natural window light illuminates the right side of her face, casting soft shadows across the gray ribbed texture of her top.\n[Shot 2] At 00:02.500, the shot cuts to a slightly wider medium shot, keeping <Subject 1> centrally framed. She begins a light, rhythmic dance move. She sways her hips gently to the left and then to the right while simultaneously raising both arms, elbows slightly bent, in a loose, flowing wave motion. Her gaze follows the movement of her hands as she sways. At 00:05.000, she pivots her body slightly to the right, allowing her wavy hair to bounce and swirl around her shoulders as she steps smoothly in place. Her expression shifts to a bright, cheerful smile as she continues the swaying motion.\n[Shot 3] At 00:06.500, the shot cuts back to a medium close-up as she finishes the dance. She brings her hands down to rest near her waist, leans her upper body slightly forward, and tilts her head to the side, delivering a final, warm, and playful smile directly to the camera. She maintains this final pose for a split second until the clip ends at 00:08.000. Throughout the shots, the background remains the well-lit modern interior with the window and the muted urban view outside.\n\noverall_soundscape:\nA quiet and bright indoor room tone, featuring a faint ambient hum from the city outside the window and the soft rustling of the fabric of the woman's gray top as she moves. Gentle, light footstep sounds occur as she steps and sways during the middle portion of the clip.\n\nnon_diegetic_music:\nA short, upbeat, and cheerful acoustic-pop instrumental track. It features a light guitar strumming pattern, a simple bass line, and a playful synth melody. The music has a bright and breezy tempo of approximately 120 BPM, starting softly right at the beginning of the video, building slightly in energy as the dance progresses, and ending abruptly with a clean, resolved pluck exactly at the 8-second mark.",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    },
+    {
+      "id": "f_acpy9qz",
+      "node": "137",
+      "input": "image",
+      "name": "图片",
+      "type": "image",
+      "default": "9638f96f-12d6-4057-a139-20b667abde2d_0.png",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    },
+    {
+      "id": "f_oim9wrp",
+      "node": "136",
+      "input": "ref_image_size",
+      "name": "ref_image_size",
+      "type": "image",
+      "default": "match",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    }
+  ],
+  "mini_cards": {
+    "prompt": {
+      "x": 24,
+      "y": 30
+    },
+    "image": {
+      "x": 24,
+      "y": 210
+    },
+    "custom": {
+      "x": 280,
+      "y": 78
+    },
+    "output": {
+      "x": 540,
+      "y": 120
+    }
+  }
+}

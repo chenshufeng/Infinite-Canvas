@@ -1,0 +1,75 @@
+{
+  "title": "video_minimax_h3_i2v",
+  "fields": [
+    {
+      "id": "f_vtv07re",
+      "node": "114",
+      "input": "image",
+      "name": "图片",
+      "type": "image",
+      "default": "ref-0.png",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    },
+    {
+      "id": "f_m44llfx",
+      "node": "105:111",
+      "input": "value",
+      "name": "数值",
+      "type": "number",
+      "default": 5,
+      "min": 0.0,
+      "max": 10.0,
+      "step": 1.0,
+      "options": [],
+      "random_enabled": false
+    },
+    {
+      "id": "f_wi9fu91",
+      "node": "115",
+      "input": "megapixels",
+      "name": "百万像素",
+      "type": "number",
+      "default": 0.4,
+      "min": 0.0,
+      "max": 10.0,
+      "step": 0.1,
+      "options": [],
+      "random_enabled": false
+    },
+    {
+      "id": "f_ovmjj7z",
+      "node": "105:104",
+      "input": "prompt",
+      "name": "提示词",
+      "type": "textarea",
+      "default": "雨夜街头，镜头保持稳定，身着白裙的女生撑着透明雨伞缓步走来，正面望向镜头，她伸出手的瞬间，漫天雨滴骤然静止，万千水珠悬停在空中，形成凝固的雨幕；她再次轻轻挥手，水珠应声坠落，雨势恢复如常，雨水顺着伞面、发丝与裙边缓缓滑落，全程画面平稳，光影柔和流动，氛围梦幻又富有电影感。",
+      "min": null,
+      "max": null,
+      "step": null,
+      "options": [],
+      "random_enabled": false
+    }
+  ],
+  "mini_cards": {
+    "prompt": {
+      "x": 24,
+      "y": 30
+    },
+    "image": {
+      "x": 24,
+      "y": 210
+    },
+    "custom": {
+      "x": 280,
+      "y": 78
+    },
+    "output": {
+      "x": 540,
+      "y": 120
+    }
+  }
+}

@@ -237,6 +237,7 @@ CANVAS_DIR = os.path.join(DATA_DIR, "canvases")
 MEDIA_PREVIEW_DIR = os.path.join(DATA_DIR, "media_previews")
 ASSET_LIBRARY_PATH = os.path.join(DATA_DIR, "asset_library.json")
 PROMPT_LIBRARY_PATH = os.path.join(DATA_DIR, "prompt_libraries.json")
+PROMPT_SOURCES_PATH = os.path.join(DATA_DIR, "prompt_sources.json")
 API_PROVIDERS_FILE = os.path.join(DATA_DIR, "api_providers.json")
 RUNNINGHUB_WORKFLOW_STORE_FILE = os.path.join(DATA_DIR, "runninghub_workflows.json")
 SHARED_FOLDERS_FILE = os.path.join(DATA_DIR, "shared_folders.json")
@@ -3200,6 +3201,12 @@ class PromptLibraryBatchDeleteRequest(BaseModel):
 class PromptLibraryCategoryRequest(BaseModel):
     name: str = "新分组"
     library_id: str = ""
+
+class PromptSourceRequest(BaseModel):
+    name: str = ""
+    url: str = ""
+    homepage: str = ""
+    enabled: Optional[bool] = True
 
 # --- 负载均衡 ---
 
@@ -19026,6 +19033,350 @@ def run_workflow(name: str, payload: WorkflowRunRequest):
         client_id=payload.client_id or str(uuid.uuid4()),
     )
     return generate(req)
+
+# ---------------------------------------------------------------------------
+# 社区提示词来源 (Community Prompt Sources)
+# ---------------------------------------------------------------------------
+
+PROMPT_REGISTRY_SOURCE_BASE = "https://raw.githubusercontent.com/yukkcat/image-prompts/main/dist/sources"
+
+def default_prompt_sources():
+    """内置社区提示词来源列表（与 basketikun 项目保持一致）。"""
+    entries = [
+        ("banana-prompt-quicker", "Banana Prompt Quicker", "https://glidea.github.io/banana-prompt-quicker/"),
+        ("davidwu-gpt-image2-prompts", "DavidWu GPT Image 2", "https://github.com/davidwuw0811-boop/awesome-gpt-image2-prompts"),
+        ("freestylefly-gpt-image-2", "Freestylefly GPT Image 2", "https://github.com/freestylefly/awesome-gpt-image-2"),
+        ("awesome-gpt-image", "Awesome GPT Image", "https://github.com/ZeroLu/awesome-gpt-image"),
+        ("awesome-gpt4o-image-prompts", "Awesome GPT-4o", "https://github.com/ImgEdify/Awesome-GPT4o-Image-Prompts"),
+        ("youmind-gpt-image-2", "YouMind GPT Image 2", "https://github.com/YouMind-OpenLab/awesome-gpt-image-2"),
+        ("youmind-nano-banana-pro", "YouMind Nano Banana Pro", "https://github.com/YouMind-OpenLab/awesome-nano-banana-pro-prompts"),
+    ]
+    return [
+        {"id": sid, "name": name, "url": f"{PROMPT_REGISTRY_SOURCE_BASE}/{sid}.json", "homepage": hp, "enabled": True, "builtIn": True}
+        for sid, name, hp in entries
+    ]
+
+def default_prompt_sources_data():
+    return {"sources": default_prompt_sources(), "cache": {}}
+
+def normalize_prompt_source(src):
+    if not isinstance(src, dict):
+        return None
+    sid = re.sub(r"[^A-Za-z0-9_-]+", "_", str(src.get("id") or f"src_{uuid.uuid4().hex[:12]}"))[:60]
+    if not sid:
+        return None
+    return {
+        "id": sid,
+        "name": str(src.get("name") or sid).strip()[:120],
+        "url": str(src.get("url") or "").strip()[:2000],
+        "homepage": str(src.get("homepage") or "").strip()[:2000],
+        "enabled": bool(src.get("enabled", True)),
+        "builtIn": bool(src.get("builtIn", False)),
+    }
+
+def normalize_prompt_sources_data(data):
+    if not isinstance(data, dict):
+        data = default_prompt_sources_data()
+    raw_sources = data.get("sources") if isinstance(data.get("sources"), list) else []
+    built_in_ids = {s["id"] for s in default_prompt_sources()}
+    sources = []
+    seen_ids = set()
+    # 先补齐内置来源（确保版本更新后新增的内置来源自动出现）
+    for builtin in default_prompt_sources():
+        if builtin["id"] in seen_ids:
+            continue
+        seen_ids.add(builtin["id"])
+        # 如果用户之前保存过该内置来源的配置，保留 enabled 状态
+        user_copy = next((s for s in raw_sources if isinstance(s, dict) and s.get("id") == builtin["id"]), None)
+        if user_copy:
+            merged = {**builtin, "enabled": bool(user_copy.get("enabled", True))}
+            sources.append(merged)
+        else:
+            sources.append(builtin)
+    # 再追加用户自定义来源
+    for raw in raw_sources:
+        src = normalize_prompt_source(raw)
+        if not src or src["id"] in seen_ids:
+            continue
+        seen_ids.add(src["id"])
+        sources.append(src)
+    cache = data.get("cache") if isinstance(data.get("cache"), dict) else {}
+    # 规范化缓存条目
+    norm_cache = {}
+    for sid, entry in cache.items():
+        if not isinstance(entry, dict):
+            continue
+        norm_cache[str(sid)] = {
+            "items": [normalize_community_prompt_item(item) for item in (entry.get("items") or []) if isinstance(item, dict)],
+            "fetchedAt": int(entry.get("fetchedAt") or 0),
+            "lastError": str(entry.get("lastError") or ""),
+        }
+    return {"sources": sources, "cache": norm_cache}
+
+def normalize_community_prompt_item(item):
+    if not isinstance(item, dict):
+        return None
+    title = str(item.get("title") or item.get("name") or "").strip()
+    prompt = str(item.get("prompt") or item.get("positive") or "").strip()
+    if not title or not prompt:
+        return None
+    tags = [str(t).strip() for t in (item.get("tags") or []) if isinstance(t, str) and str(t).strip()]
+    ref_urls = [str(u).strip() for u in (item.get("referenceImageUrls") or []) if isinstance(u, str) and str(u).strip()]
+    cover = str(item.get("coverUrl") or "").strip()
+    if not cover and ref_urls:
+        cover = ref_urls[0]
+    return {
+        "id": str(item.get("id") or f"cp_{uuid.uuid4().hex[:12]}")[:80],
+        "title": title[:300],
+        "prompt": prompt,
+        "description": str(item.get("description") or "").strip()[:2000],
+        "coverUrl": cover[:2000],
+        "referenceImageUrls": ref_urls[:20],
+        "tags": tags[:30],
+        "preview": str(item.get("preview") or "").strip()[:5000],
+        "createdAt": str(item.get("createdAt") or "").strip()[:40],
+        "updatedAt": str(item.get("updatedAt") or "").strip()[:40],
+        "author": str(item.get("author") or "").strip()[:120],
+        "sourceUrl": str(item.get("sourceUrl") or "").strip()[:2000],
+        "imageMode": str(item.get("imageMode") or "").strip()[:40] or None,
+        "imageModel": str(item.get("imageModel") or "").strip()[:80] or None,
+        "imageSize": str(item.get("imageSize") or "").strip()[:40] or None,
+        "imageCount": int(item["imageCount"]) if isinstance(item.get("imageCount"), (int, float)) and item["imageCount"] > 0 else None,
+    }
+
+def load_prompt_sources():
+    if not os.path.exists(PROMPT_SOURCES_PATH):
+        data = default_prompt_sources_data()
+        return save_prompt_sources(data)
+    try:
+        with open(PROMPT_SOURCES_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception:
+        data = default_prompt_sources_data()
+    return normalize_prompt_sources_data(data)
+
+def save_prompt_sources(data):
+    data = normalize_prompt_sources_data(data)
+    os.makedirs(DATA_DIR, exist_ok=True)
+    with open(PROMPT_SOURCES_PATH, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    return data
+
+def public_prompt_sources_summary(data):
+    """返回给前端的来源列表（不含缓存中的完整 items，只含状态摘要）。"""
+    data = normalize_prompt_sources_data(data)
+    cache = data.get("cache", {})
+    sources = []
+    for src in data.get("sources", []):
+        entry = cache.get(src["id"], {})
+        sources.append({
+            **src,
+            "count": len(entry.get("items") or []),
+            "fetchedAt": entry.get("fetchedAt", 0),
+            "lastError": entry.get("lastError", ""),
+        })
+    return {"sources": sources}
+
+async def fetch_remote_prompt_source(source):
+    """后端代理拉取外部 JSON 并规范化。"""
+    url = source.get("url", "").strip()
+    if not url:
+        raise ValueError("来源 URL 为空")
+    try:
+        async with httpx.AsyncClient(timeout=30, follow_redirects=True) as client:
+            resp = await client.get(url)
+            resp.raise_for_status()
+            raw_data = resp.json()
+    except Exception as e:
+        raise ValueError(f"拉取失败: {e}")
+    if not isinstance(raw_data, list):
+        raise ValueError("来源返回的数据格式无效（期望 JSON 数组）")
+    items = []
+    for raw in raw_data:
+        item = normalize_community_prompt_item(raw)
+        if item:
+            items.append(item)
+    return items
+
+@app.get("/api/prompt-sources")
+async def get_prompt_sources():
+    data = load_prompt_sources()
+    return public_prompt_sources_summary(data)
+
+@app.post("/api/prompt-sources")
+async def create_prompt_source(payload: PromptSourceRequest):
+    name = str(payload.name or "").strip()
+    url = str(payload.url or "").strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="来源名称不能为空")
+    if not url:
+        raise HTTPException(status_code=400, detail="来源 URL 不能为空")
+    data = load_prompt_sources()
+    src_id = re.sub(r"[^A-Za-z0-9_-]+", "_", name)[:40] or f"src_{uuid.uuid4().hex[:12]}"
+    # 避免 ID 冲突
+    existing_ids = {s["id"] for s in data.get("sources", [])}
+    base_id = src_id
+    counter = 1
+    while src_id in existing_ids:
+        src_id = f"{base_id}_{counter}"
+        counter += 1
+    source = {
+        "id": src_id,
+        "name": name[:120],
+        "url": url[:2000],
+        "homepage": str(payload.homepage or "").strip()[:2000],
+        "enabled": bool(payload.enabled if payload.enabled is not None else True),
+        "builtIn": False,
+    }
+    data.setdefault("sources", []).append(source)
+    data = save_prompt_sources(data)
+    return public_prompt_sources_summary(data)
+
+@app.patch("/api/prompt-sources/{source_id}")
+async def update_prompt_source(source_id: str, payload: PromptSourceRequest):
+    data = load_prompt_sources()
+    found = None
+    for src in data.get("sources", []):
+        if src["id"] == source_id:
+            found = src
+            break
+    if not found:
+        raise HTTPException(status_code=404, detail="来源不存在")
+    if payload.name is not None and str(payload.name).strip():
+        found["name"] = str(payload.name).strip()[:120]
+    if payload.url is not None and str(payload.url).strip():
+        found["url"] = str(payload.url).strip()[:2000]
+    if payload.homepage is not None:
+        found["homepage"] = str(payload.homepage).strip()[:2000]
+    if payload.enabled is not None:
+        found["enabled"] = bool(payload.enabled)
+    data = save_prompt_sources(data)
+    return public_prompt_sources_summary(data)
+
+@app.delete("/api/prompt-sources/{source_id}")
+async def delete_prompt_source(source_id: str):
+    data = load_prompt_sources()
+    sources = data.get("sources", [])
+    target = next((s for s in sources if s["id"] == source_id), None)
+    if not target:
+        raise HTTPException(status_code=404, detail="来源不存在")
+    if target.get("builtIn"):
+        raise HTTPException(status_code=400, detail="内置来源不能删除，可以禁用")
+    data["sources"] = [s for s in sources if s["id"] != source_id]
+    data.get("cache", {}).pop(source_id, None)
+    data = save_prompt_sources(data)
+    return public_prompt_sources_summary(data)
+
+@app.post("/api/prompt-sources/{source_id}/refresh")
+async def refresh_prompt_source(source_id: str):
+    data = load_prompt_sources()
+    source = next((s for s in data.get("sources", []) if s["id"] == source_id), None)
+    if not source:
+        raise HTTPException(status_code=404, detail="来源不存在")
+    try:
+        items = await fetch_remote_prompt_source(source)
+        data.setdefault("cache", {})[source_id] = {
+            "items": items,
+            "fetchedAt": now_ms(),
+            "lastError": "",
+        }
+        data = save_prompt_sources(data)
+        return {"success": True, "sourceId": source_id, "count": len(items), "lastError": ""}
+    except ValueError as e:
+        # 拉取失败，保留旧缓存
+        old = data.get("cache", {}).get(source_id, {})
+        data.setdefault("cache", {})[source_id] = {
+            "items": old.get("items", []),
+            "fetchedAt": old.get("fetchedAt", 0),
+            "lastError": str(e),
+        }
+        data = save_prompt_sources(data)
+        return {"success": False, "sourceId": source_id, "count": len(old.get("items", [])), "lastError": str(e)}
+
+@app.post("/api/prompt-sources/refresh-all")
+async def refresh_all_prompt_sources():
+    data = load_prompt_sources()
+    results = []
+    for source in data.get("sources", []):
+        if not source.get("enabled"):
+            continue
+        try:
+            items = await fetch_remote_prompt_source(source)
+            data.setdefault("cache", {})[source["id"]] = {
+                "items": items,
+                "fetchedAt": now_ms(),
+                "lastError": "",
+            }
+            results.append({"sourceId": source["id"], "success": True, "count": len(items), "lastError": ""})
+        except ValueError as e:
+            old = data.get("cache", {}).get(source["id"], {})
+            data.setdefault("cache", {})[source["id"]] = {
+                "items": old.get("items", []),
+                "fetchedAt": old.get("fetchedAt", 0),
+                "lastError": str(e),
+            }
+            results.append({"sourceId": source["id"], "success": False, "count": len(old.get("items", [])), "lastError": str(e)})
+    data = save_prompt_sources(data)
+    success_count = sum(1 for r in results if r["success"])
+    return {"results": results, "total": len(results), "successCount": success_count, "failureCount": len(results) - success_count}
+
+@app.get("/api/community-prompts")
+async def get_community_prompts(source: str = "", keyword: str = "", tags: str = "", page: int = 1, page_size: int = 20):
+    data = load_prompt_sources()
+    cache = data.get("cache", {})
+    sources_list = data.get("sources", [])
+    enabled_ids = {s["id"] for s in sources_list if s.get("enabled")}
+    # 收集所有启用的来源的提示词
+    all_items = []
+    source_filter = source.strip()
+    for src in sources_list:
+        sid = src["id"]
+        if not src.get("enabled"):
+            continue
+        if source_filter and sid != source_filter:
+            continue
+        entry = cache.get(sid, {})
+        for item in (entry.get("items") or []):
+            all_items.append({**item, "_sourceId": sid, "_sourceName": src.get("name", sid), "_category": src.get("name", sid)})
+    # 搜索过滤
+    kw = keyword.strip().lower()
+    tag_list = [t.strip().lower() for t in tags.split(",") if t.strip()] if tags else []
+    if kw or tag_list:
+        filtered = []
+        for item in all_items:
+            if tag_list:
+                item_tags_lower = [t.lower() for t in (item.get("tags") or [])]
+                if not any(t in item_tags_lower for t in tag_list):
+                    continue
+            if kw:
+                haystack = " ".join([
+                    item.get("title", ""),
+                    item.get("prompt", ""),
+                    item.get("description", ""),
+                    item.get("_sourceName", ""),
+                    " ".join(item.get("tags") or []),
+                ]).lower()
+                if kw not in haystack:
+                    continue
+            filtered.append(item)
+        all_items = filtered
+    # 收集所有标签（用于前端标签筛选）
+    all_tags = sorted(set(t for item in all_items for t in (item.get("tags") or []) if t))
+    # 收集来源列表（用于前端来源筛选）
+    all_categories = [s["name"] for s in sources_list if s.get("enabled")]
+    total = len(all_items)
+    # 分页
+    page = max(1, page)
+    page_size = max(1, min(100, page_size))
+    start = (page - 1) * page_size
+    end = start + page_size
+    page_items = all_items[start:end]
+    # 清理内部字段
+    for item in page_items:
+        item.pop("_sourceId", None)
+        item.pop("_sourceName", None)
+        item.pop("_category", None)
+    return {"items": page_items, "tags": all_tags, "categories": all_categories, "total": total, "page": page, "pageSize": page_size}
 
 if __name__ == "__main__":
     import uvicorn
