@@ -316,6 +316,8 @@ const promptTemplateSearch = document.getElementById('promptTemplateSearch');
 const promptTemplateLibrarySelect = document.getElementById('promptTemplateLibrarySelect');
 const promptTemplateCats = document.getElementById('promptTemplateCats');
 const promptTemplateBody = document.getElementById('promptTemplateBody');
+const promptTemplateLocalSection = document.getElementById('promptTemplateLocalSection');
+const promptTemplateCommunityBody = document.getElementById('promptTemplateCommunityBody');
 const canvasAssetToggle = document.getElementById('canvasAssetToggle');
 const canvasAssetPanel = document.getElementById('canvasAssetPanel');
 const canvasAssetCloseBtn = document.getElementById('canvasAssetCloseBtn');
@@ -437,6 +439,7 @@ let promptTemplateCategory = 'all';
 let promptTemplateSelectedId = '';
 let promptTemplateQuery = '';
 let promptTemplateEditing = false;
+let promptTemplateSourceTab = 'local'; // 'local' | 'community'
 let canvasPromptTemplates = [];
 let canvasPromptTemplatesLoaded = false;
 let canvasPromptLibraries = [];
@@ -7222,6 +7225,13 @@ async function loadCanvasPromptTemplates(){
     canvasPromptTemplatesLoaded = true;
     return canvasPromptTemplates;
 }
+// 社区词库模块兼容别名
+window.loadPromptTemplates = loadCanvasPromptTemplates;
+window.closePromptTemplatePanel = closePromptTemplateModal;
+// 暴露 nodes / promptTemplatePanel / activePromptLibraryId 供社区词库模块访问（const/let 声明跨 script 不可见）
+Object.defineProperty(window, 'nodes', { get: () => nodes, configurable: true });
+Object.defineProperty(window, 'promptTemplatePanel', { get: () => promptTemplatePanel, configurable: true });
+Object.defineProperty(window, 'activePromptLibraryId', { get: () => activePromptLibraryId, configurable: true });
 function activeCanvasPromptLibrary(){
     return canvasPromptLibraries.find(lib => lib.id === activePromptLibraryId) || canvasPromptLibraries[0] || {id:'system', name:'系统提示词库', readonly:true, items:[]};
 }
@@ -7626,6 +7636,18 @@ async function deleteCanvasPromptTemplateGroup(groupId){
 }
 function renderPromptTemplateModal(){
     if(!promptTemplateModal || !promptTemplatePanel || !promptTemplateCats || !promptTemplateBody) return;
+    // 同步 Tab 按钮状态
+    document.querySelectorAll('.prompt-template-source-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.sourceTab === promptTemplateSourceTab);
+    });
+    // 根据 Tab 切换显示区域
+    if(promptTemplateLocalSection) promptTemplateLocalSection.style.display = promptTemplateSourceTab === 'local' ? '' : 'none';
+    if(promptTemplateCommunityBody) promptTemplateCommunityBody.style.display = promptTemplateSourceTab === 'community' ? '' : 'none';
+    // 社区词库 Tab：渲染社区内容后返回
+    if(promptTemplateSourceTab === 'community') {
+        if(typeof renderCommunityTab === 'function') renderCommunityTab();
+        return;
+    }
     canvasPromptTemplates = activeCanvasPromptLibraryItems();
     renderCanvasPromptLibrarySelect();
     const scrollSnapshot = promptTemplateScrollSnapshot();
@@ -7750,7 +7772,13 @@ async function openPromptTemplateModal(nodeId){
     promptTemplateNodeId = nodeId || '';
     promptTemplateQuery = '';
     promptTemplateEditing = false;
+    promptTemplateSourceTab = 'local';
     if(promptTemplateSearch) promptTemplateSearch.value = '';
+    // 设置 panel 数据属性，供社区词库模块的 applyCommunityPromptToCanvas 使用
+    if(promptTemplatePanel){
+        promptTemplatePanel.dataset.nodeId = promptTemplateNodeId;
+        promptTemplatePanel.dataset.target = 'node';
+    }
     await loadCanvasPromptTemplates();
     if(!promptTemplateCategory) promptTemplateCategory = 'all';
     if(!promptTemplateSelectedId) promptTemplateSelectedId = canvasPromptTemplates[0]?.id || '';
@@ -14007,6 +14035,13 @@ promptTemplatePanel?.addEventListener('mousedown', e => e.stopPropagation());
 promptTemplatePanel?.addEventListener('wheel', e => e.stopPropagation(), {passive:false});
 promptTemplatePanel?.addEventListener('click', event => {
     event.stopPropagation();
+    // 来源 Tab 切换（本地词库 / 社区词库）
+    const sourceTab = event.target.closest('[data-source-tab]');
+    if(sourceTab){
+        promptTemplateSourceTab = sourceTab.dataset.sourceTab || 'local';
+        renderPromptTemplateModal();
+        return;
+    }
     const apply = event.target.closest('[data-template-apply],[data-prompt-template-apply]');
     if(apply){
         applyPromptTemplateToPromptNode(apply.dataset.templateApply || apply.dataset.promptTemplateApply || 'positive');
@@ -16081,6 +16116,24 @@ function hasImageDropData(dataTransfer){
 function hasOutputImageDrag(dataTransfer){ return [...(dataTransfer?.types || [])].includes('application/x-canvas-output-image'); }
 function escapeHtml(str){ return String(str == null ? '' : str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s])); }
 function escapeAttr(str){ return escapeHtml(str); }
+
+// 社区提示词详情弹窗图片放大光箱
+function openSmartLogLightbox(url){
+    if(!url) return;
+    let box = document.getElementById('smartLogLightbox');
+    if(!box){
+        box = document.createElement('div');
+        box.id = 'smartLogLightbox';
+        box.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:zoom-out;';
+        box.innerHTML = '<img alt="preview" style="max-width:90vw;max-height:90vh;object-fit:contain;border-radius:8px;box-shadow:0 8px 32px rgba(0,0,0,.5);" draggable="false"><button type="button" style="position:absolute;top:16px;right:16px;width:36px;height:36px;border-radius:50%;border:none;background:rgba(255,255,255,.15);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;" aria-label="Close">&times;</button>';
+        document.body.appendChild(box);
+        box.addEventListener('click', e => { if(e.target === box || e.target.tagName === 'BUTTON') box.remove(); });
+        box.querySelector('button').addEventListener('click', e => { e.stopPropagation(); box.remove(); });
+    }
+    const img = box.querySelector('img');
+    img.src = url;
+    box.style.display = 'flex';
+}
 
 window.onload = async () => {
     applyTheme(localStorage.getItem('studio_theme') || localStorage.getItem(CANVAS_THEME_KEY) || 'light');

@@ -459,6 +459,13 @@ body.canvas-selecting .node .llm-bubble { pointer-events:none !important; }
 .prompt-template-search input { flex:1; min-width:0; border:0; outline:0; background:transparent; color:var(--text); font-size:11px; font-weight:650; }
 .prompt-template-library-select { width:100%; height:32px; border-radius:11px; border:1px solid var(--line); background:var(--card); color:var(--text); padding:0 10px; font-size:11px; font-weight:800; outline:none; }
 .prompt-template-cats { flex:0 0 auto; }
+.prompt-template-source-tabs { display:flex; align-items:center; gap:6px; flex:0 0 auto; }
+.prompt-template-source-tab { height:30px; flex:0 0 auto; padding:0 12px; border-radius:10px; border:1px solid var(--line); background:var(--card); color:var(--muted); display:inline-flex; align-items:center; gap:6px; font-size:11px; font-weight:800; cursor:pointer; transition:all .12s ease; }
+.prompt-template-source-tab i,.prompt-template-source-tab svg { width:13px !important; height:13px !important; }
+.prompt-template-source-tab:hover { border-color:var(--text); color:var(--text); }
+.prompt-template-source-tab.active { background:var(--strong); border-color:var(--strong); color:var(--strong-text); }
+.prompt-template-community-body { flex:1; min-height:0; overflow-y:auto; }
+#promptTemplateLocalSection { flex:1; min-height:0; display:flex; flex-direction:column; grid-column:1 / -1; }
 .prompt-template-nav { display:flex; align-items:center; gap:8px; padding-bottom:2px; }
 .prompt-template-tabs { flex:1; min-width:0; display:flex; align-items:center; gap:6px; overflow:auto; scrollbar-width:none; }
 .prompt-template-tabs::-webkit-scrollbar { display:none; }
@@ -524,7 +531,7 @@ body.canvas-selecting .node .llm-bubble { pointer-events:none !important; }
 .theme-dark .prompt-template-icon-actions button.danger { color:#fca5a5; }
 .theme-dark .prompt-template-icon-actions button.danger:hover { background:rgba(248,113,113,.18); border-color:rgba(248,113,113,.34); color:#fecaca; }
 .prompt-template-icon-actions i,.prompt-template-icon-actions svg { width:14px !important; height:14px !important; }
-.prompt-template-preview-content { min-height:0; overflow:auto; display:flex; flex-direction:column; gap:10px; padding-right:3px; scrollbar-width:thin; scrollbar-color:rgba(148,163,184,.45) transparent; }
+.prompt-template-preview-content { flex:1; min-height:0; overflow:auto; display:flex; flex-direction:column; gap:10px; padding-right:3px; scrollbar-width:thin; scrollbar-color:rgba(148,163,184,.45) transparent; }
 .prompt-template-preview-content::-webkit-scrollbar { width:8px; }
 .prompt-template-preview-content::-webkit-scrollbar-track { background:transparent; }
 .prompt-template-preview-content::-webkit-scrollbar-thumb { background:rgba(148,163,184,.42); border-radius:999px; border:2px solid transparent; background-clip:content-box; }

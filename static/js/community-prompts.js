@@ -365,6 +365,7 @@ async function copyCommunityPrompt(text) {
     try {
         await navigator.clipboard.writeText(text || '');
         if (typeof toast === 'function') toast('已复制提示词');
+        else if (typeof setStatus === 'function') setStatus('已复制提示词');
     } catch {
         // fallback
         const ta = document.createElement('textarea');
@@ -374,6 +375,7 @@ async function copyCommunityPrompt(text) {
         document.execCommand('copy');
         document.body.removeChild(ta);
         if (typeof toast === 'function') toast('已复制提示词');
+        else if (typeof setStatus === 'function') setStatus('已复制提示词');
     }
 }
 
@@ -386,22 +388,44 @@ function findCommunityItemById(id) {
 // ---- Esc 关闭所有弹窗（分层关闭） ----
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' || e.key === 'Esc') {
-        // 优先关闭图片灯箱（smartLogLightbox 或 communityImgLightbox）
-        const smartLightbox = document.getElementById('smartLogLightbox');
-        const smartLightboxOpen = smartLightbox && smartLightbox.classList.contains('open');
-        const communityLightbox = document.getElementById('communityImgLightbox');
-        const modal = document.querySelector('#promptTemplateCommunityBody .community-modal-backdrop');
-        if (smartLightboxOpen) {
-            if (typeof closeSmartLogLightbox === 'function') closeSmartLogLightbox();
+        // 1. 优先关闭输出图片光箱（canvas 页面）
+        const outputLightbox = document.getElementById('outputLightbox');
+        if (outputLightbox && outputLightbox.classList.contains('open')) {
+            if (typeof closeOutputLightbox === 'function') closeOutputLightbox();
             e.stopImmediatePropagation();
             e.preventDefault();
-        } else if (communityLightbox) {
+            return;
+        }
+        // 2. 关闭智能日志图片光箱（display 控制）
+        const smartLightbox = document.getElementById('smartLogLightbox');
+        if (smartLightbox && smartLightbox.style.display !== 'none') {
+            smartLightbox.remove();
+            e.stopImmediatePropagation();
+            e.preventDefault();
+            return;
+        }
+        // 3. 关闭社区图片光箱
+        const communityLightbox = document.getElementById('communityImgLightbox');
+        if (communityLightbox) {
             communityLightbox.remove();
             e.stopImmediatePropagation();
             e.preventDefault();
-        } else if (modal) {
+            return;
+        }
+        // 4. 关闭社区提示词详情弹窗
+        const modal = document.querySelector('#promptTemplateCommunityBody .community-modal-backdrop');
+        if (modal) {
             communityDetailItem = null;
             modal.remove();
+            e.stopImmediatePropagation();
+            e.preventDefault();
+            return;
+        }
+        // 5. 最后关闭提示词模板面板
+        const panel = document.getElementById('promptTemplateModal');
+        if (panel && panel.classList.contains('open')) {
+            if (typeof closePromptTemplateModal === 'function') closePromptTemplateModal();
+            else if (typeof closePromptTemplatePanel === 'function') closePromptTemplatePanel();
             e.stopImmediatePropagation();
             e.preventDefault();
         }
