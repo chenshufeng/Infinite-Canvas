@@ -5528,8 +5528,8 @@ function setAssetLibraryFromResponse(data, options={}){
     assetLibrary = data.library || assetLibrary;
     assetLibraryUpdatedAt = Number(assetLibrary.updated_at || assetLibraryUpdatedAt || 0);
     const libs = assetLibraries();
-    if(!activeAssetLibraryId) activeAssetLibraryId = assetLibrary.active_library_id || libs[0]?.id || '';
-    if(activeAssetLibraryId && activeAssetLibraryId !== LOCAL_ASSET_LIBRARY_ID && !libs.some(lib => lib.id === activeAssetLibraryId)) activeAssetLibraryId = libs[0]?.id || '';
+    if(!activeAssetLibraryId) activeAssetLibraryId = assetLibrary.active_library_id || LOCAL_ASSET_LIBRARY_ID || libs[0]?.id || '';
+    if(activeAssetLibraryId && activeAssetLibraryId !== LOCAL_ASSET_LIBRARY_ID && !libs.some(lib => lib.id === activeAssetLibraryId)) activeAssetLibraryId = libs[0]?.id || LOCAL_ASSET_LIBRARY_ID || '';
     const cats = assetCategories('image');
     if(activeAssetCategoryId && !cats.some(cat => cat.id === activeAssetCategoryId)) activeAssetCategoryId = '';
     if(!activeAssetCategoryId) activeAssetCategoryId = activeAssetCategory()?.id || '';
@@ -5602,7 +5602,7 @@ function renderAssetLibrary(){
     if(!assetPanel || !assetGrid || !assetCategorySelect) return;
     document.querySelectorAll('[data-asset-tab]').forEach(btn => btn.classList.toggle('active', btn.dataset.assetTab === assetTab));
     const libs = currentAssetSourceLibraries();
-    if(!activeAssetLibraryId || !libs.some(lib => lib.id === activeAssetLibraryId)) activeAssetLibraryId = assetLibrary.active_library_id || assetLibraries()[0]?.id || LOCAL_ASSET_LIBRARY_ID;
+    if(!activeAssetLibraryId || !libs.some(lib => lib.id === activeAssetLibraryId)) activeAssetLibraryId = assetLibrary.active_library_id || LOCAL_ASSET_LIBRARY_ID || assetLibraries()[0]?.id || '';
     if(assetLibrarySelect){
         assetLibrarySelect.innerHTML = libs.map(lib => `<option value="${escapeHtml(lib.id)}" ${lib.id === activeAssetLibraryId ? 'selected' : ''}>${escapeHtml(lib.name || '资产库')}</option>`).join('');
     }

@@ -17,6 +17,7 @@ let communitySources = [];
 let communityItems = []; // 当前页已加载的项
 let communityAllItems = []; // 全部已加载的项（用于客户端过滤）
 let communityTags = [];
+let communityAllTags = [];
 let communityCategories = [];
 let communityTotal = 0;
 let communityPage = 1;
@@ -59,21 +60,25 @@ async function loadCommunityPrompts(append = false) {
     try {
         const data = await communityApiJson(`/api/community-prompts?${params}`);
         const items = Array.isArray(data.items) ? data.items : [];
+        const serverTags = Array.isArray(data.tags) ? data.tags : [];
         if (append) {
             communityItems = communityItems.concat(items);
             communityAllItems = communityAllItems.concat(items);
         } else {
             communityItems = items;
-            // 如果没有 keyword/tag 过滤，保存到 allItems；否则只保留当前结果
+            // 始终更新全量数据缓存，确保客户端过滤基于最新数据
+            communityAllItems = items;
+            // 无过滤时更新全量标签缓存
             if (!communityKeyword && !communityTagFilter) {
-                communityAllItems = items;
+                communityAllTags = serverTags;
             }
         }
-        communityTags = Array.isArray(data.tags) ? data.tags : [];
+        // 有过滤时从缓存中展示全量标签，避免标签被覆盖为子集
+        communityTags = (communityKeyword || communityTagFilter) ? communityAllTags : serverTags;
         communityCategories = Array.isArray(data.categories) ? data.categories : [];
         communityTotal = data.total || 0;
     } catch (e) {
-        if (!append) { communityItems = []; communityAllItems = []; communityTotal = 0; }
+        if (!append) { communityItems = []; communityAllItems = []; communityTags = []; communityAllTags = []; communityTotal = 0; }
     } finally {
         communityLoading = false;
     }
@@ -140,6 +145,13 @@ async function renderCommunityTab() {
     const existingEmpty = root.querySelector('.community-loading, .community-empty');
     
     if (existingGrid) {
+        // 同步筛选按钮的 active 状态
+        root.querySelectorAll('[data-community-tag]').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.communityTag === communityTagFilter);
+        });
+        root.querySelectorAll('[data-community-source]').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.communitySource === communitySourceFilter);
+        });
         // 只更新网格内容
         existingGrid.innerHTML = displayItems.map((item, idx) => renderCommunityCard(item, idx)).join('');
         if (window.lucide) lucide.createIcons();
@@ -213,7 +225,7 @@ async function renderCommunityTab() {
             </div>
             ${communityTags.length ? `<div class="community-tag-filter">
                 <button type="button" class="community-filter-tag ${!communityTagFilter ? 'active' : ''}" data-community-tag="">全部标签</button>
-                ${communityTags.slice(0, 30).map(t => `<button type="button" class="community-filter-tag ${communityTagFilter === t ? 'active' : ''}" data-community-tag="${escapeAttr(t)}">${escapeHtml(t)}</button>`).join('')}
+                ${communityTags.map(t => `<button type="button" class="community-filter-tag ${communityTagFilter === t ? 'active' : ''}" data-community-tag="${escapeAttr(t)}">${escapeHtml(t)}</button>`).join('')}
             </div>` : ''}
         </div>
         <div class="community-info"><span>共 ${communityTotal} 条提示词</span>${displayItems.length ? `<span>已加载 ${displayItems.length} 条</span>` : ''}</div>
