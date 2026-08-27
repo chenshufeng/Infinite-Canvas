@@ -19,7 +19,7 @@
     <script src="/static/vendor/js/lucide.js?v=2026.08.04.1787198026"></script>
     <script src="/static/js/theme.js?v=2026.08.04.1787198026"></script>
     <link rel="stylesheet" href="/static/css/theme.css?v=2026.08.04.1787198026">
-    <link rel="stylesheet" href="/static/css/asset-manager.css?v=2026.08.04.1787198026">
+    <link rel="stylesheet" href="/static/css/asset-manager.css?v=2026.08.04.1787815888">
 </head>
 <body>
     <div class="asset-page">
@@ -39,14 +39,51 @@
             <button id="assetTabAssets" class="active" type="button" data-tab="assets"><i data-lucide="image"></i><span>图片资产</span></button>
             <button id="assetTabWorkflows" type="button" data-tab="workflows"><i data-lucide="workflow"></i><span>工作流管理</span></button>
             <button id="assetTabPrompts" type="button" data-tab="prompts"><i data-lucide="text-cursor-input"></i><span>提示词库</span></button>
+            <button id="assetTabCommunity" type="button" data-tab="community"><i data-lucide="globe"></i><span>社区提示词</span></button>
             <button id="assetTabCanvasAssets" type="button" data-tab="canvas-assets"><i data-lucide="layout-dashboard"></i><span>画布资产</span></button>
             <button id="assetTabLocal" type="button" data-tab="local"><i data-lucide="folder-open"></i><span>本地素材</span></button>
         </div>
 
         <main id="assetManagerRoot" class="asset-manager-root"></main>
+        <!-- 社区提示词容器（隐藏，由 JS 移入 assetManagerRoot 渲染） -->
+        <div id="promptTemplateCommunityBody" style="display:none"></div>
     </div>
 
     <input id="assetUploadInput" type="file" accept="image/*,video/*,audio/*,.json,.zip,application/json,application/zip" multiple hidden>
-    <script src="/static/js/asset-manager.js?v=2026.08.04.1787198026"></script>
+    <script>
+    // 素材库中“使用”社区提示词时，降级为复制到剪贴板
+    function applyCommunityPromptToCanvas(promptText) {
+        if (!promptText) return;
+        navigator.clipboard.writeText(promptText).then(function() {
+            if (typeof toast === 'function') toast('已复制提示词到剪贴板');
+        }).catch(function() {
+            var ta = document.createElement('textarea');
+            ta.value = promptText;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            if (typeof toast === 'function') toast('已复制提示词到剪贴板');
+        });
+    }
+    // 社区提示词详情中的图片预览
+    function openSmartLogLightbox(imgUrl) {
+        if (!imgUrl) return;
+        var existing = document.getElementById('communityImgLightbox');
+        if (existing) existing.remove();
+        var overlay = document.createElement('div');
+        overlay.id = 'communityImgLightbox';
+        overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;cursor:zoom-out;padding:20px;';
+        overlay.onclick = function() { overlay.remove(); };
+        var img = document.createElement('img');
+        img.src = imgUrl;
+        img.style.cssText = 'max-width:90vw;max-height:90vh;object-fit:contain;border-radius:4px;';
+        img.onclick = function(e) { e.stopPropagation(); };
+        overlay.appendChild(img);
+        document.body.appendChild(overlay);
+    }
+    </script>
+    <script src="/static/js/community-prompts.js?v=2026.08.04.1787815378"></script>
+    <script src="/static/js/asset-manager.js?v=2026.08.04.1787816022"></script>
 </body>
 </html>

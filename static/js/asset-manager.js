@@ -117,6 +117,7 @@ const SEARCH_INPUT_IDS = new Set(['assetSearch','workflowSearch','promptSearch',
 
 function refreshIcons(){ if(window.lucide) lucide.createIcons(); }
 function setStatus(text='准备就绪'){ if(statusEl) statusEl.textContent = text || '准备就绪'; }
+function toast(msg) { setStatus(msg); setTimeout(() => setStatus(), 3000); }
 function escapeHtml(value=''){
     return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
@@ -1340,15 +1341,71 @@ async function loadAll(){
     render();
     setStatus('准备就绪');
 }
+let _communityScrollHandler = null;
 function render(){
     const scrollState = [...document.querySelectorAll('.nav-scroll,.content-scroll,.detail-scroll')]
         .map((el, index) => ({index, top:el.scrollTop, left:el.scrollLeft}));
     document.querySelectorAll('[data-tab]').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === activeTab));
-    if(activeTab === 'prompts') renderPromptManager();
-    else if(activeTab === 'workflows') renderWorkflowManager();
-    else if(activeTab === 'local') renderLocalManager();
-    else if(activeTab === 'canvas-assets') renderCanvasAssetsManager();
-    else renderAssetManager();
+    const communityContainer = document.getElementById('promptTemplateCommunityBody');
+    const assetManagerRoot = document.getElementById('assetManagerRoot');
+    if(activeTab === 'community') {
+        // 社区提示词 tab：将社区容器移入 assetManagerRoot 内部
+        if(assetManagerRoot && communityContainer) {
+            // 先把社区容器移回 page，避免 innerHTML 销毁它
+            const page = assetManagerRoot.parentElement;
+            if(communityContainer.parentElement === assetManagerRoot) {
+                if(page) page.appendChild(communityContainer);
+            }
+            assetManagerRoot.innerHTML = ''; // 安全清空
+            assetManagerRoot.classList.add('community-mode');
+            assetManagerRoot.appendChild(communityContainer);
+            communityContainer.style.display = '';
+        }
+        if(typeof renderCommunityTab === 'function') renderCommunityTab();
+        // 绑定滚动分页监听
+        if(assetManagerRoot && !_communityScrollHandler) {
+            _communityScrollHandler = async () => {
+                const el = assetManagerRoot;
+                if(activeTab !== 'community') return;
+                if(typeof communityLoading !== 'undefined' && communityLoading) return;
+                if(typeof communityItems !== 'undefined' && typeof communityTotal !== 'undefined') {
+                    if(communityItems.length >= communityTotal) return;
+                }
+                // 距离底部 200px 时触发加载
+                if(el.scrollTop + el.clientHeight >= el.scrollHeight - 200) {
+                    if(typeof communityPage !== 'undefined') communityPage++;
+                    if(typeof loadCommunityPrompts === 'function') {
+                        await loadCommunityPrompts(true);
+                    }
+                    if(typeof renderCommunityTab === 'function') {
+                        await renderCommunityTab();
+                    }
+                }
+            };
+            assetManagerRoot.addEventListener('scroll', _communityScrollHandler);
+        }
+    } else {
+        // 其他 tab：移除滚动监听，将社区容器移回原位
+        if(assetManagerRoot && _communityScrollHandler) {
+            assetManagerRoot.removeEventListener('scroll', _communityScrollHandler);
+            _communityScrollHandler = null;
+        }
+        // 其他 tab：将社区容器移回原位，恢复正常布局
+        if(communityContainer) communityContainer.style.display = 'none';
+        if(assetManagerRoot) {
+            assetManagerRoot.classList.remove('community-mode');
+            // 将社区容器移回 .asset-page（assetManagerRoot 的兄弟位置）
+            const page = assetManagerRoot.parentElement;
+            if(page && communityContainer.parentElement !== page) {
+                page.insertBefore(communityContainer, assetManagerRoot.nextSibling);
+            }
+        }
+        if(activeTab === 'prompts') renderPromptManager();
+        else if(activeTab === 'workflows') renderWorkflowManager();
+        else if(activeTab === 'local') renderLocalManager();
+        else if(activeTab === 'canvas-assets') renderCanvasAssetsManager();
+        else renderAssetManager();
+    }
     refreshIcons();
     if(scrollState.length){
         requestAnimationFrame(() => {

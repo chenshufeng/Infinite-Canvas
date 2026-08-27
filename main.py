@@ -19183,7 +19183,7 @@ async def fetch_remote_prompt_source(source):
     if not url:
         raise ValueError("来源 URL 为空")
     try:
-        async with httpx.AsyncClient(timeout=30, follow_redirects=True) as client:
+        async with _httpx_client_with_proxy(timeout=30, follow_redirects=True) as client:
             resp = await client.get(url)
             resp.raise_for_status()
             raw_data = resp.json()
@@ -19281,6 +19281,8 @@ async def refresh_prompt_source(source_id: str):
             "lastError": "",
         }
         data = save_prompt_sources(data)
+        # 异步预缓存图片（不阻塞响应）
+        asyncio.create_task(_precache_community_images(items))
         return {"success": True, "sourceId": source_id, "count": len(items), "lastError": ""}
     except ValueError as e:
         # 拉取失败，保留旧缓存
@@ -19317,6 +19319,15 @@ async def refresh_all_prompt_sources():
             }
             results.append({"sourceId": source["id"], "success": False, "count": len(old.get("items", [])), "lastError": str(e)})
     data = save_prompt_sources(data)
+    # 异步预缓存所有来源的图片
+    all_items = []
+    for source in data.get("sources", []):
+        if not source.get("enabled"):
+            continue
+        cache_entry = data.get("cache", {}).get(source["id"], {})
+        all_items.extend(cache_entry.get("items") or [])
+    if all_items:
+        asyncio.create_task(_precache_community_images(all_items))
     success_count = sum(1 for r in results if r["success"])
     return {"results": results, "total": len(results), "successCount": success_count, "failureCount": len(results) - success_count}
 
@@ -19377,6 +19388,123 @@ async def get_community_prompts(source: str = "", keyword: str = "", tags: str =
         item.pop("_sourceName", None)
         item.pop("_category", None)
     return {"items": page_items, "tags": all_tags, "categories": all_categories, "total": total, "page": page, "pageSize": page_size}
+
+# ---- 社区提示词图片缓存 ----
+COMMUNITY_CACHE_DIR = os.path.join(ASSETS_DIR, "community_cache")
+COMMUNITY_CACHE_ORIGINALS = os.path.join(COMMUNITY_CACHE_DIR, "originals")
+COMMUNITY_CACHE_THUMBS = os.path.join(COMMUNITY_CACHE_DIR, "thumbs")
+os.makedirs(COMMUNITY_CACHE_ORIGINALS, exist_ok=True)
+os.makedirs(COMMUNITY_CACHE_THUMBS, exist_ok=True)
+# 内存锁：防止同一 URL 被并发重复下载
+_community_download_locks: dict[str, asyncio.Lock] = {}
+_community_download_locks_guard = asyncio.Lock()
+
+def _community_cache_hash(url: str) -> str:
+    return hashlib.sha256(url.encode("utf-8")).hexdigest()[:16]
+
+def _httpx_client_with_proxy(**kwargs):
+    """创建支持代理的 httpx 客户端"""
+    proxy_url = os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy") or os.environ.get("HTTP_PROXY") or os.environ.get("http_proxy") or ""
+    if proxy_url:
+        kwargs["proxy"] = proxy_url
+    return httpx.AsyncClient(**kwargs)
+
+def _community_cache_find(url: str, thumb: bool = False):
+    h = _community_cache_hash(url)
+    directory = COMMUNITY_CACHE_THUMBS if thumb else COMMUNITY_CACHE_ORIGINALS
+    for ext in (".webp", ".jpg", ".jpeg", ".png"):
+        p = os.path.join(directory, h + ext)
+        if os.path.isfile(p):
+            return p
+    return None
+
+async def _community_cache_download(url: str):
+    """下载外部图片并缓存，返回 (原图路径, 缩略图路径)"""
+    h = _community_cache_hash(url)
+    # 检查是否已缓存（无锁快速路径）
+    existing = _community_cache_find(url, False)
+    if existing:
+        thumb = _community_cache_find(url, True)
+        return existing, thumb
+    # 获取该 URL 的下载锁，防止并发重复下载
+    async with _community_download_locks_guard:
+        if h not in _community_download_locks:
+            _community_download_locks[h] = asyncio.Lock()
+        lock = _community_download_locks[h]
+    async with lock:
+        # 拿到锁后再检查一次（可能别的协程已经下载完了）
+        existing = _community_cache_find(url, False)
+        if existing:
+            thumb = _community_cache_find(url, True)
+            return existing, thumb
+        # 下载（支持代理）
+        try:
+            async with _httpx_client_with_proxy(timeout=30) as client:
+                resp = await client.get(url, follow_redirects=True)
+                resp.raise_for_status()
+                content = resp.content
+        except Exception:
+            return None, None
+        # 确定原始文件扩展名
+        ct = resp.headers.get("content-type", "")
+        if "png" in ct:
+            orig_ext = ".png"
+        elif "webp" in ct:
+            orig_ext = ".webp"
+        else:
+            orig_ext = ".jpg"
+        orig_path = os.path.join(COMMUNITY_CACHE_ORIGINALS, h + orig_ext)
+        with open(orig_path, "wb") as f:
+            f.write(content)
+        # 生成缩略图 (WebP, 512px)
+        thumb_path = None
+        try:
+            img = Image.open(BytesIO(content))
+            img = ImageOps.exif_transpose(img)
+            img.thumbnail((512, 512))
+            if img.mode in ("RGBA", "P"):
+                img = img.convert("RGB")
+            thumb_path = os.path.join(COMMUNITY_CACHE_THUMBS, h + ".webp")
+            img.save(thumb_path, "WEBP", quality=80)
+        except Exception:
+            pass
+        return orig_path, thumb_path
+
+async def _precache_community_images(items: list):
+    """批量预缓存提示词列表中的所有图片（封面+参考图）"""
+    urls = set()
+    for item in items:
+        cover = item.get("coverUrl") or ""
+        if cover:
+            urls.add(cover)
+        for u in (item.get("referenceImageUrls") or []):
+            if u:
+                urls.add(u)
+    if not urls:
+        return
+    # 并发下载，但限制同时数量避免压垮外部服务器
+    sem = asyncio.Semaphore(5)
+    async def _limited(url):
+        async with sem:
+            await _community_cache_download(url)
+    await asyncio.gather(*[_limited(u) for u in urls], return_exceptions=True)
+
+@app.get("/api/image-cache")
+async def image_cache(url: str = "", size: str = ""):
+    """代理缓存外部图片。size=thumb 返回缩略图，否则返回原图。"""
+    if not url:
+        raise HTTPException(400, "url required")
+    want_thumb = size == "thumb"
+    # 先查本地
+    cached = _community_cache_find(url, want_thumb)
+    if cached:
+        return FileResponse(cached)
+    # 下载并缓存
+    orig, thumb = await _community_cache_download(url)
+    if not orig:
+        raise HTTPException(502, "failed to download image")
+    target = thumb if want_thumb and thumb else orig
+    return FileResponse(target)
 
 if __name__ == "__main__":
     import uvicorn
