@@ -280,10 +280,10 @@ const RECOMMENDED_APIS = [
     {
         name:'Agnes AI',
         category:'free',
-        base_url:'https://apihub.agnes-ai.com',
+        base_url:'https://api.agnes-ai.cn/v1',
         protocol:'openai',
         image_request_mode:'openai-json',
-        register_url:'https://platform.agnes-ai.com/settings/apiKeys',
+        register_url:'https://platform.agnes-ai.cn/settings/apiKeys',
         tagKeys:['api.tagImageModels','api.tagVideoModels','api.tagLlmModels'],
         icons:['IMG','VID','LLM'],
         summaryKey:'api.recommendAgnesSummary',
